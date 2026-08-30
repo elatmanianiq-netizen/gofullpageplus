@@ -2,26 +2,67 @@
  * Vercel Serverless Function: POST /api/support/tickets
  *
  * Emails support form submissions to the site owner over SMTP. Nothing is
- * stored — the deployment stays stateless, which matters on Vercel's ephemeral
- * filesystem. Replies go straight back to the user via the Reply-To header.
+ * stored — the deployment stays stateless. Replies go straight back to the user
+ * via the Reply-To header.
+ *
+ * Self-contained on purpose: Vercel compiles each function under api/ on its
+ * own, and cross-file relative imports (../_shared.js) are a common source of
+ * build failures, so everything this function needs lives in this file.
  */
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import nodemailer from "nodemailer";
 
-import {
-  SUPPORT_LIMITS,
-  cleanEmail,
-  cleanString,
-  findSupportCategory,
-  makeReference,
-} from "../_shared.js";
+// ─── Categories (mirrors shared/support.ts) ──────────────────────────────────
+const SUPPORT_CATEGORIES: Array<{ id: string; label: string }> = [
+  { id: "icon-missing", label: "I cannot see the extension icon" },
+  { id: "capture-wrong", label: "The capture does not look how I expected" },
+  { id: "shortcut", label: "The keyboard shortcut does not work" },
+  { id: "blocked-page", label: "Nothing happens on a particular page" },
+  { id: "export", label: "PNG, JPG, or PDF export problem" },
+  { id: "editor", label: "Problem with the editor, cropping, or annotations" },
+  { id: "privacy", label: "Privacy or data protection question" },
+  { id: "feature-request", label: "Feature request" },
+  { id: "other", label: "Something else" },
+];
 
-function smtpConfigured(): boolean {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+const LIMITS = {
+  subjectMax: 140,
+  messageMin: 20,
+  messageMax: 4000,
+  emailMax: 254,
+  nameMax: 80,
+  versionMax: 20,
+  browserMax: 200,
+  sourcePageMax: 500,
+};
+
+function cleanString(value: unknown, maxLength: number): string {
+  if (typeof value !== "string") return "";
+  return value
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function cleanEmail(value: unknown): string {
+  const email = cleanString(value, LIMITS.emailMax).toLowerCase();
+  if (!email) return "";
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : "";
+}
+
+function makeReference(): string {
+  const alphabet = "23456789BCDFGHJKLMNPQRSTVWXZ";
+  let code = "";
+  for (let i = 0; i < 6; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return `GFP-${code}`;
 }
 
 function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function smtpConfigured(): boolean {
+  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -34,22 +75,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ ok: false, error: "Use POST to submit a ticket." });
   }
 
-  const body = req.body ?? {};
+  const body = (req.body ?? {}) as Record<string, unknown>;
 
   // Honeypot: only bots fill this hidden field. Pretend success.
   if (cleanString(body.companyWebsite, 100)) {
     return res.status(200).json({ ok: true, reference: makeReference() });
   }
 
-  const category = findSupportCategory(cleanString(body.category, 60));
-  const subject = cleanString(body.subject, SUPPORT_LIMITS.subjectMax);
-  const message = cleanString(body.message, SUPPORT_LIMITS.messageMax);
+  const category = SUPPORT_CATEGORIES.find((c) => c.id === cleanString(body.category, 60));
+  const subject = cleanString(body.subject, LIMITS.subjectMax);
+  const message = cleanString(body.message, LIMITS.messageMax);
 
   const errors: Record<string, string> = {};
   if (!category) errors.category = "Choose the option that best matches your issue.";
   if (!subject) errors.subject = "Add a short summary.";
-  if (message.length < SUPPORT_LIMITS.messageMin) {
-    errors.message = `Please describe the issue in at least ${SUPPORT_LIMITS.messageMin} characters.`;
+  if (message.length < LIMITS.messageMin) {
+    errors.message = `Please describe the issue in at least ${LIMITS.messageMin} characters.`;
   }
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ ok: false, error: "Please check the form.", errors });
@@ -65,10 +106,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const reference = makeReference();
   const email = cleanEmail(body.email);
-  const name = cleanString(body.name, SUPPORT_LIMITS.nameMax);
-  const extensionVersion = cleanString(body.extensionVersion, SUPPORT_LIMITS.versionMax);
-  const browser = cleanString(body.browser, SUPPORT_LIMITS.browserMax);
-  const sourcePage = cleanString(body.sourcePage, SUPPORT_LIMITS.sourcePageMax);
+  const name = cleanString(body.name, LIMITS.nameMax);
+  const extensionVersion = cleanString(body.extensionVersion, LIMITS.versionMax);
+  const browser = cleanString(body.browser, LIMITS.browserMax);
+  const sourcePage = cleanString(body.sourcePage, LIMITS.sourcePageMax);
 
   const rows: Array<[string, string]> = [
     ["Reference", reference],

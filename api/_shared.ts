@@ -1,36 +1,8 @@
 /**
- * Shared helpers for Vercel serverless API functions.
+ * Shared helpers for the Vercel serverless support function.
  * Self-contained to avoid cross-directory import issues on Vercel.
  */
 import type { VercelRequest } from "@vercel/node";
-import { createHash, timingSafeEqual } from "node:crypto";
-import fsp from "node:fs/promises";
-import path from "node:path";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-export type TicketStatus = "new" | "open" | "resolved";
-
-export const TICKET_STATUSES: readonly TicketStatus[] = ["new", "open", "resolved"];
-
-export interface SupportTicket {
-  id: string;
-  reference: string;
-  createdAt: string;
-  updatedAt: string;
-  status: TicketStatus;
-  category: string;
-  categoryLabel: string;
-  subject: string;
-  message: string;
-  email: string;
-  name: string;
-  extensionVersion: string;
-  browser: string;
-  sourcePage: string;
-  ipPrefix: string;
-  adminNotes: string;
-}
 
 // ─── Categories ──────────────────────────────────────────────────────────────
 
@@ -107,41 +79,4 @@ export function ipPrefixOf(req: VercelRequest): string {
   const octets = address.split(".");
   if (octets.length === 4) return `${octets.slice(0, 3).join(".")}.0/24`;
   return "unknown";
-}
-
-// ─── Storage ─────────────────────────────────────────────────────────────────
-
-const DATA_FILE = path.join("/tmp", "support-tickets.json");
-
-export async function readTickets(): Promise<SupportTicket[]> {
-  try {
-    const raw = await fsp.readFile(DATA_FILE, "utf-8");
-    return JSON.parse(raw) as SupportTicket[];
-  } catch {
-    return [];
-  }
-}
-
-export async function writeTickets(tickets: SupportTicket[]): Promise<void> {
-  await fsp.writeFile(DATA_FILE, JSON.stringify(tickets, null, 2), "utf-8");
-}
-
-// ─── Auth ────────────────────────────────────────────────────────────────────
-
-export function requireAdmin(req: VercelRequest): string | null {
-  const adminToken = process.env.ADMIN_TOKEN ?? "";
-  if (adminToken.length < 16) {
-    return "Admin access is not configured. Set ADMIN_TOKEN (at least 16 characters) in the server environment.";
-  }
-
-  const header = req.headers.authorization ?? "";
-  const provided = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
-  if (!provided) return "Missing admin token.";
-
-  const digest = (v: string) => createHash("sha256").update(v).digest();
-  if (!timingSafeEqual(digest(provided), digest(adminToken))) {
-    return "Invalid admin token.";
-  }
-
-  return null;
 }

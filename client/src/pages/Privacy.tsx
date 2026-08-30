@@ -8,7 +8,7 @@
  *   • extension/manifest.json      — the permission list in "Permissions"
  *   • extension/shared/store.js    — MAX_AGE_MS, the six-hour retention claim
  *   • extension/background.js      — the "no network requests" claim
- *   • server/support-api.ts        — what the support form stores
+ *   • server/support-api.ts        — what the support form sends by email
  */
 import { Database, Download, FileCode2, Globe, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
@@ -229,25 +229,22 @@ export default function Privacy() {
           <h3>Support form and email</h3>
           <p>
             If you contact us through the{" "}
-            <Link href="/support">support form</Link>, we receive and store what you
-            submitted: the issue category, your summary and description, and, if you
+            <Link href="/support">support form</Link>, what you submit is sent to us
+            as an email: the issue category, your summary and description, and, if you
             chose to provide them, your name and email address. The form also
             attaches the extension version you reported, a short description of your
             browser and operating system, and the address of the page you submitted
-            from, because those details are usually what make a bug reproducible.
+            from, because those details are usually what make a bug reproducible. We
+            do not keep a separate database of submissions; the message simply
+            arrives in our support mailbox like any other email.
           </p>
           <p>
-            We additionally record a shortened form of your network address, with
-            the final part removed, purely to stop automated abuse of the form. It
-            is not precise enough to identify you.
-          </p>
-          <p>
-            We use this only to answer you and to fix the problem you reported. We
-            keep support messages for up to {siteConfig.supportRetentionDays} days,
-            after which they are deleted automatically. If we operate an internal
-            notification service to alert us that a new message has arrived, it
-            receives only the reference code, category, and summary, never the body
-            of your message.
+            We use this only to answer you and to fix the problem you reported, and
+            we retain it in our mailbox no longer than we need to for that purpose.
+            The website itself stores nothing about your submission after the email
+            is sent, and we briefly process a shortened form of your network
+            address, with the final part removed, only to stop automated abuse of
+            the form; it is not precise enough to identify you.
           </p>
 
           <h3>Website analytics</h3>

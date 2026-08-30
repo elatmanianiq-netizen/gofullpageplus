@@ -8,7 +8,7 @@ import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { createSupportApi } from "./server/support-api.js";
 
 // Load .env into process.env for server-side middleware (Vite only exposes
-// VITE_* prefixed vars to the client; the support API needs ADMIN_TOKEN etc.)
+// VITE_* prefixed vars to the client; the support API needs the SMTP_* vars).
 function loadEnvFile() {
   const envPath = path.resolve(import.meta.dirname, ".env");
   if (!fs.existsSync(envPath)) return;

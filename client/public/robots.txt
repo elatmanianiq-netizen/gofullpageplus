@@ -1,10 +1,7 @@
 User-agent: *
 Allow: /
 
-# The support inbox holds messages from real users. Never index it.
-Disallow: /admin
+# Internal API endpoints, nothing to index.
 Disallow: /api/
 
-# Replace the host below with your deployed domain, matching `siteUrl` in
-# client/src/site-config.ts.
 Sitemap: https://www.gofullpageplus.com/sitemap.xml

@@ -57,8 +57,6 @@ export const siteConfig = {
   // ── Legal document dates ──────────────────────────────────────────────────
   /** Shown as "Last updated" on the Privacy Policy and Terms. */
   lastUpdated: "16 August 2026",
-  /** Retention window for support tickets, in days. Must match server config. */
-  supportRetentionDays: 365,
 } as const;
 
 /** True when a config value is still an unfilled placeholder. */

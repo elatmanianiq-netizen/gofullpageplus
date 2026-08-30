@@ -4,7 +4,6 @@ import NotFound from "@/pages/NotFound";
 import { Route, Router as WouterRouter, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Admin from "./pages/Admin";
 import Faq from "./pages/Faq";
 import Home from "./pages/Home";
 import Privacy from "./pages/Privacy";
@@ -25,9 +24,6 @@ function Router() {
       <Route path={"/terms"} component={Terms} />
       <Route path={"/support"} component={Support} />
       <Route path={"/faq"} component={Faq} />
-
-      {/* Internal support inbox. Token gated, and excluded in robots.txt. */}
-      <Route path={"/admin"} component={Admin} />
 
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

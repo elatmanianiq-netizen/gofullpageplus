@@ -103,15 +103,6 @@ export const SUPPORT_LIMITS = {
   sourcePageMax: 500,
 } as const;
 
-/** Triage state of a ticket in the admin inbox. */
-export type TicketStatus = "new" | "open" | "resolved";
-
-export const TICKET_STATUSES: readonly TicketStatus[] = [
-  "new",
-  "open",
-  "resolved",
-];
-
 /** Exactly what the browser sends to `POST /api/support/tickets`. */
 export interface SupportTicketInput {
   category: string;
@@ -124,30 +115,4 @@ export interface SupportTicketInput {
   sourcePage?: string;
   /** Anti-spam honeypot. Real users never see or fill this. */
   companyWebsite?: string;
-}
-
-/** A stored ticket, as returned to the admin inbox. */
-export interface SupportTicket {
-  id: string;
-  /** Short human-readable code given to the user, e.g. `GFP-7QK2M4`. */
-  reference: string;
-  createdAt: string;
-  updatedAt: string;
-  status: TicketStatus;
-  category: string;
-  categoryLabel: string;
-  subject: string;
-  message: string;
-  email: string;
-  name: string;
-  extensionVersion: string;
-  browser: string;
-  sourcePage: string;
-  /**
-   * Coarse network origin kept only for abuse rate limiting. The final octet of
-   * an IPv4 address, and everything after the network prefix of an IPv6
-   * address, is discarded before storage.
-   */
-  ipPrefix: string;
-  adminNotes: string;
 }

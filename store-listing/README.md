@@ -67,8 +67,9 @@ Set these URLs in the dashboard once the site is deployed:
 - Support / contact: `https://yourdomain.com/support`
 - Homepage: `https://yourdomain.com/`
 
-The support form on `/support` writes to the inbox at `/admin`, which needs
-`ADMIN_TOKEN` set in the server environment. See `.env.example`.
+The support form on `/support` emails submissions to the site owner over SMTP.
+Set `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` (and optionally `SMTP_PORT`,
+`SMTP_FROM`, `SUPPORT_TO`) in the server environment. See `.env.example`.
 
 ## Sources
 

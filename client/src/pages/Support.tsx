@@ -5,9 +5,9 @@
  * stand on its own: a reviewer following the link must find a working way to
  * reach a human without installing anything.
  *
- * Submissions go to POST /api/support/tickets and land in the admin inbox at
- * /admin. A direct email address is always offered as a fallback, because a
- * form that fails silently is worse than no form.
+ * Submissions go to POST /api/support/tickets, which emails them to the site
+ * owner over SMTP. A direct email address is always offered as a fallback,
+ * because a form that fails silently is worse than no form.
  */
 import { useMemo, useState } from "react";
 import {
@@ -434,10 +434,10 @@ export default function Support() {
             <p>
               Sending this form stores what you typed above, plus{" "}
               <strong>{browser || "your browser version"}</strong> and the address
-              of this page, so we can reproduce the problem. We keep it for up to{" "}
-              {siteConfig.supportRetentionDays} days and use it only to answer you.
-              Your screenshots are never included: they stay on your device. See
-              the <Link href="/privacy">Privacy Policy</Link>.
+              of this page, so we can reproduce the problem. This is emailed to our
+              support team and used only to answer you. Your screenshots are never
+              included: they stay on your device. See the{" "}
+              <Link href="/privacy">Privacy Policy</Link>.
             </p>
           </div>
 

@@ -72,8 +72,7 @@ function buildRobots(siteUrl) {
   return (
     `User-agent: *\n` +
     `Allow: /\n\n` +
-    `# The support inbox holds messages from real users. Never index it.\n` +
-    `Disallow: /admin\n` +
+    `# Internal API endpoints, nothing to index.\n` +
     `Disallow: /api/\n\n` +
     `Sitemap: ${siteUrl}/sitemap.xml\n`
   );

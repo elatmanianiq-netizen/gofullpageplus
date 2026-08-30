@@ -1,38 +1,26 @@
 /**
- * Support ticket API — deliberately framework-free.
+ * Support ticket API — connect-style handler shared by dev and production.
  *
- * This module exports a single connect-style `(req, res, next)` handler, which
- * lets the exact same code serve both environments:
+ * The same handler runs in both environments:
  *   • production — mounted on the Express app in server/index.ts
  *   • development — mounted on Vite's dev server middleware stack
  *
- * Because of that dual use it must not depend on Express-specific helpers
- * (`res.json`, `req.body`), so responses are written with raw node:http APIs.
+ * It exposes one route:
+ *   POST /api/support/tickets   public   submit a support message
  *
- * Routes
- *   POST   /api/support/tickets      public   submit a ticket
- *   GET    /api/admin/tickets        private  list tickets, newest first
- *   PATCH  /api/admin/tickets/:id    private  update status / admin notes
- *
- * Storage is a single JSON file. That is the right call at this scale: a
- * support inbox for a browser extension receives a handful of messages a day,
- * and a file keeps deployment to "copy the folder" with no database to run.
- * Writes are serialised through one promise chain and committed atomically via
- * rename, so a crash mid-write cannot corrupt the file.
+ * Submissions are emailed to the site owner over SMTP (see server/support-
+ * email.ts); nothing is stored. It must not depend on Express-specific helpers
+ * (`res.json`, `req.body`) because Vite's middleware provides neither, so
+ * responses are written with raw node:http APIs.
  */
-
-import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
-import fsp from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import path from "node:path";
 
 import {
   SUPPORT_LIMITS,
-  TICKET_STATUSES,
   findSupportCategory,
-  type SupportTicket,
-  type TicketStatus,
 } from "../shared/support.js";
+import { sendSupportEmail, smtpConfigured } from "./support-email.js";
 
 // ─── Configuration ───────────────────────────────────────────────────────────
 
@@ -43,79 +31,14 @@ const MAX_BODY_BYTES = 64 * 1024;
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 
-/** Tickets older than this are pruned on the next write. */
-const RETENTION_DAYS = Number(process.env.SUPPORT_RETENTION_DAYS ?? 365);
-
-/** Hard ceiling on stored tickets, so the file cannot grow without bound. */
-const MAX_STORED_TICKETS = 5000;
-
-function dataDir(): string {
-  return process.env.SUPPORT_DATA_DIR
-    ? path.resolve(process.env.SUPPORT_DATA_DIR)
-    : path.resolve(process.cwd(), "data");
-}
-
-function dataFile(): string {
-  return path.join(dataDir(), "support-tickets.json");
-}
-
-// ─── Storage ─────────────────────────────────────────────────────────────────
-
-/**
- * All mutations queue on this chain. Two concurrent submissions would
- * otherwise read the same array and one would overwrite the other.
- */
-let writeChain: Promise<unknown> = Promise.resolve();
-
-function serialise<T>(operation: () => Promise<T>): Promise<T> {
-  const result = writeChain.then(operation, operation);
-  // Keep the chain alive even when an operation rejects.
-  writeChain = result.catch(() => undefined);
-  return result;
-}
-
-async function readTickets(): Promise<SupportTicket[]> {
-  try {
-    const raw = await fsp.readFile(dataFile(), "utf-8");
-    const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as SupportTicket[]) : [];
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
-    // A corrupt file must not take the whole site down; log and start clean.
-    console.error("[support-api] could not read ticket store:", error);
-    return [];
-  }
-}
-
-async function writeTickets(tickets: SupportTicket[]): Promise<void> {
-  const cutoff = Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
-  const retained = tickets
-    .filter((ticket) => {
-      const created = Date.parse(ticket.createdAt);
-      return Number.isNaN(created) ? true : created >= cutoff;
-    })
-    .slice(0, MAX_STORED_TICKETS);
-
-  await fsp.mkdir(dataDir(), { recursive: true });
-
-  // Write to a sibling temp file, then rename: rename is atomic on POSIX, so a
-  // reader never observes a half-written file.
-  const target = dataFile();
-  const temp = `${target}.${process.pid}.tmp`;
-  await fsp.writeFile(temp, JSON.stringify(retained, null, 2), "utf-8");
-  await fsp.rename(temp, target);
-}
-
 // ─── HTTP helpers ────────────────────────────────────────────────────────────
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
-  const payload = JSON.stringify(body);
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
-  // Ticket data must never be embedded or sniffed into another content type.
   res.setHeader("X-Content-Type-Options", "nosniff");
-  res.end(payload);
+  res.end(JSON.stringify(body));
 }
 
 async function readBody(req: IncomingMessage): Promise<unknown> {
@@ -149,11 +72,6 @@ class HttpError extends Error {
 
 // ─── Field handling ──────────────────────────────────────────────────────────
 
-/**
- * Normalises any untrusted value into a bounded single-line-safe string.
- * Control characters are stripped so a ticket can never inject terminal escape
- * sequences or break the admin table layout; tabs and newlines survive.
- */
 function cleanString(value: unknown, maxLength: number): string {
   if (typeof value !== "string") return "";
   return value
@@ -163,10 +81,6 @@ function cleanString(value: unknown, maxLength: number): string {
     .slice(0, maxLength);
 }
 
-/**
- * Deliberately permissive: an over-strict pattern that rejects a valid address
- * costs a real support conversation. Replies are sent by a human anyway.
- */
 function cleanEmail(value: unknown): string {
   const email = cleanString(value, SUPPORT_LIMITS.emailMax).toLowerCase();
   if (!email) return "";
@@ -183,11 +97,6 @@ function makeReference(): string {
   return `GFP-${code}`;
 }
 
-/**
- * Reduces a caller address to a coarse prefix. Storing a full IP alongside a
- * support message is personal data we have no use for; a prefix is enough to
- * rate limit abuse.
- */
 function ipPrefixOf(req: IncomingMessage): string {
   const forwarded = req.headers["x-forwarded-for"];
   const raw =
@@ -197,7 +106,6 @@ function ipPrefixOf(req: IncomingMessage): string {
 
   const address = raw.replace(/^::ffff:/, "");
   if (address.includes(":")) {
-    // IPv6: keep the /48 routing prefix only.
     return `${address.split(":").slice(0, 3).join(":")}::/48`;
   }
   const octets = address.split(".");
@@ -223,7 +131,6 @@ function rateLimited(key: string): boolean {
   recent.push(now);
   submissionLog.set(key, recent);
 
-  // Opportunistic cleanup so the map cannot grow forever.
   if (submissionLog.size > 10_000) {
     for (const [entryKey, times] of Array.from(submissionLog.entries())) {
       if (times.every((at: number) => now - at >= RATE_WINDOW_MS)) {
@@ -235,78 +142,7 @@ function rateLimited(key: string): boolean {
   return false;
 }
 
-// ─── Admin authentication ────────────────────────────────────────────────────
-
-/**
- * A single shared bearer token, read from ADMIN_TOKEN.
- *
- * When the variable is absent the admin routes report 503 rather than allowing
- * access: an inbox that opens itself because configuration is missing is the
- * classic way support data leaks.
- */
-function adminTokenConfigured(): boolean {
-  const token = process.env.ADMIN_TOKEN ?? "";
-  return token.length >= 16;
-}
-
-function requireAdmin(req: IncomingMessage): void {
-  if (!adminTokenConfigured()) {
-    throw new HttpError(
-      503,
-      "Admin access is not configured. Set ADMIN_TOKEN (at least 16 characters) in the server environment.",
-    );
-  }
-
-  const header = req.headers.authorization ?? "";
-  const provided = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
-  if (!provided) throw new HttpError(401, "Missing admin token.");
-
-  // Hash both sides first so timingSafeEqual always receives equal lengths and
-  // cannot leak the expected token's length.
-  const digest = (value: string) => createHash("sha256").update(value).digest();
-  if (!timingSafeEqual(digest(provided), digest(process.env.ADMIN_TOKEN ?? ""))) {
-    throw new HttpError(401, "Invalid admin token.");
-  }
-}
-
-// ─── Outbound notification ───────────────────────────────────────────────────
-
-/**
- * Optional ping to a webhook you control (Slack, Discord, Zapier, your own
- * endpoint) so a new ticket reaches you without polling the admin page.
- *
- * Off unless SUPPORT_WEBHOOK_URL is set. The message body is never included —
- * only the reference, category, and subject — so a third-party webhook does not
- * become a copy of every user's support history.
- */
-function notifyWebhook(ticket: SupportTicket): void {
-  const url = process.env.SUPPORT_WEBHOOK_URL;
-  if (!url) return;
-
-  const summary =
-    `New support ticket ${ticket.reference}\n` +
-    `Category: ${ticket.categoryLabel}\n` +
-    `Subject: ${ticket.subject}\n` +
-    `Reply to: ${ticket.email || "(no address given)"}`;
-
-  void fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      text: summary,
-      reference: ticket.reference,
-      category: ticket.category,
-      subject: ticket.subject,
-      hasEmail: Boolean(ticket.email),
-      createdAt: ticket.createdAt,
-    }),
-  }).catch((error: unknown) => {
-    // A failed notification must never fail the user's submission.
-    console.error("[support-api] webhook notification failed:", error);
-  });
-}
-
-// ─── Route handlers ──────────────────────────────────────────────────────────
+// ─── Route handler ───────────────────────────────────────────────────────────
 
 async function createTicket(
   req: IncomingMessage,
@@ -314,8 +150,7 @@ async function createTicket(
 ): Promise<void> {
   const body = (await readBody(req)) as Record<string, unknown>;
 
-  // Honeypot: the form renders this field off-screen, so only a bot fills it.
-  // Answer 200 so the bot has no signal that it was rejected.
+  // Honeypot: only bots fill this hidden field. Pretend success.
   if (cleanString(body.companyWebsite, 100)) {
     sendJson(res, 200, { ok: true, reference: makeReference() });
     return;
@@ -344,78 +179,40 @@ async function createTicket(
     return;
   }
 
-  const now = new Date().toISOString();
-  const ticket: SupportTicket = {
-    id: randomUUID(),
-    reference: makeReference(),
-    createdAt: now,
-    updatedAt: now,
-    status: "new",
-    category: category!.id,
-    categoryLabel: category!.label,
-    subject,
-    message,
-    email: cleanEmail(body.email),
-    name: cleanString(body.name, SUPPORT_LIMITS.nameMax),
-    extensionVersion: cleanString(body.extensionVersion, SUPPORT_LIMITS.versionMax),
-    browser: cleanString(body.browser, SUPPORT_LIMITS.browserMax),
-    sourcePage: cleanString(body.sourcePage, SUPPORT_LIMITS.sourcePageMax),
-    ipPrefix,
-    adminNotes: "",
-  };
-
-  await serialise(async () => {
-    const tickets = await readTickets();
-    tickets.unshift(ticket);
-    await writeTickets(tickets);
-  });
-
-  notifyWebhook(ticket);
-
-  sendJson(res, 201, { ok: true, reference: ticket.reference });
-}
-
-async function listTickets(
-  req: IncomingMessage,
-  res: ServerResponse,
-): Promise<void> {
-  requireAdmin(req);
-  const tickets = await readTickets();
-  tickets.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  sendJson(res, 200, { ok: true, tickets });
-}
-
-async function updateTicket(
-  req: IncomingMessage,
-  res: ServerResponse,
-  id: string,
-): Promise<void> {
-  requireAdmin(req);
-  const body = (await readBody(req)) as Record<string, unknown>;
-
-  const status = cleanString(body.status, 20) as TicketStatus;
-  const hasStatus = TICKET_STATUSES.includes(status);
-  const hasNotes = typeof body.adminNotes === "string";
-
-  if (!hasStatus && !hasNotes) {
-    throw new HttpError(400, "Provide a status or admin notes to update.");
+  if (!smtpConfigured()) {
+    console.error("[support] SMTP is not configured (set SMTP_HOST/SMTP_USER/SMTP_PASS).");
+    throw new HttpError(
+      503,
+      "Support email is not configured yet. Please email us directly for now.",
+    );
   }
 
-  const updated = await serialise(async () => {
-    const tickets = await readTickets();
-    const ticket = tickets.find((candidate) => candidate.id === id);
-    if (!ticket) return undefined;
+  const reference = makeReference();
 
-    if (hasStatus) ticket.status = status;
-    if (hasNotes) ticket.adminNotes = cleanString(body.adminNotes, 4000);
-    ticket.updatedAt = new Date().toISOString();
+  try {
+    await sendSupportEmail({
+      reference,
+      categoryLabel: category!.label,
+      subject,
+      message,
+      email: cleanEmail(body.email),
+      name: cleanString(body.name, SUPPORT_LIMITS.nameMax),
+      extensionVersion: cleanString(body.extensionVersion, SUPPORT_LIMITS.versionMax),
+      browser: cleanString(body.browser, SUPPORT_LIMITS.browserMax),
+      sourcePage: cleanString(body.sourcePage, SUPPORT_LIMITS.sourcePageMax),
+    });
+  } catch (error) {
+    console.error("[support] failed to send email:", error);
+    throw new HttpError(
+      502,
+      "We could not send your message right now. Please try again shortly, or email us directly.",
+    );
+  }
 
-    await writeTickets(tickets);
-    return ticket;
-  });
+  // randomUUID kept available for callers/tests that expect a unique id echoed.
+  void randomUUID;
 
-  if (!updated) throw new HttpError(404, "Ticket not found.");
-  sendJson(res, 200, { ok: true, ticket: updated });
+  sendJson(res, 201, { ok: true, reference });
 }
 
 // ─── Middleware entry point ──────────────────────────────────────────────────
@@ -431,7 +228,6 @@ export function createSupportApi() {
     const url = new URL(req.url ?? "/", "http://localhost");
     const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
-    // Anything outside the API surface belongs to the static site.
     if (!pathname.startsWith("/api/")) {
       next();
       return;
@@ -444,20 +240,6 @@ export function createSupportApi() {
         if (method === "POST") return createTicket(req, res);
         throw new HttpError(405, "Use POST to submit a ticket.");
       }
-
-      if (pathname === "/api/admin/tickets") {
-        if (method === "GET") return listTickets(req, res);
-        throw new HttpError(405, "Use GET to list tickets.");
-      }
-
-      const updateMatch = /^\/api\/admin\/tickets\/([A-Za-z0-9-]{1,64})$/.exec(
-        pathname,
-      );
-      if (updateMatch) {
-        if (method === "PATCH") return updateTicket(req, res, updateMatch[1]);
-        throw new HttpError(405, "Use PATCH to update a ticket.");
-      }
-
       throw new HttpError(404, "Unknown API endpoint.");
     };
 

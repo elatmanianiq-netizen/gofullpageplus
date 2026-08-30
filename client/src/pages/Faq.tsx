@@ -11,6 +11,7 @@ import { HelpCircle } from "lucide-react";
 import { Link } from "wouter";
 
 import SiteShell from "@/components/SiteShell";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { siteConfig } from "@/site-config";
 
 interface FaqEntry {
@@ -261,6 +262,12 @@ const groups: FaqGroup[] = [
 ];
 
 export default function Faq() {
+  usePageMeta({
+    title: "FAQ & Troubleshooting",
+    description: `How ${siteConfig.productName} works, fixes for captures that look wrong, keyboard shortcuts, and exactly what happens to your data.`,
+    path: "/faq",
+  });
+
   return (
     <SiteShell>
       <article className="gfp-doc">

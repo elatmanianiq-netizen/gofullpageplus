@@ -14,6 +14,7 @@ import { Database, Download, FileCode2, Globe, ShieldCheck } from "lucide-react"
 import { Link } from "wouter";
 
 import SiteShell from "@/components/SiteShell";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { siteConfig, supportMailto } from "@/site-config";
 
 /** Mirrors extension/manifest.json. Keep the two in step. */
@@ -45,6 +46,12 @@ const permissions = [
 ] as const;
 
 export default function Privacy() {
+  usePageMeta({
+    title: "Privacy Policy",
+    description: `How ${siteConfig.extensionName} handles your data: captures stay on your device, no tracking, no uploads. Every browser permission explained.`,
+    path: "/privacy",
+  });
+
   return (
     <SiteShell>
       <article className="gfp-doc">

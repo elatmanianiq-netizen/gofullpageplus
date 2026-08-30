@@ -9,9 +9,16 @@ import { Scale } from "lucide-react";
 import { Link } from "wouter";
 
 import SiteShell from "@/components/SiteShell";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { siteConfig, supportMailto } from "@/site-config";
 
 export default function Terms() {
+  usePageMeta({
+    title: "Terms of Service",
+    description: `The terms covering your use of ${siteConfig.extensionName} and this website.`,
+    path: "/terms",
+  });
+
   return (
     <SiteShell>
       <article className="gfp-doc">

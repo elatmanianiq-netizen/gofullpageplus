@@ -34,6 +34,7 @@ import {
 import { Link } from "wouter";
 
 import SiteShell from "@/components/SiteShell";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { resolved, siteConfig } from "@/site-config";
 
 const benefits = [
@@ -93,6 +94,13 @@ const faqPreview = [
 ] as const;
 
 export default function Home() {
+  usePageMeta({
+    title: `${siteConfig.productName} | Full Page Screenshot Extension for Chrome & Edge`,
+    description: `${siteConfig.tagline} Free, runs entirely in your browser with no account and no tracking.`,
+    path: "/",
+    exact: true,
+  });
+
   const chromeStore = resolved(siteConfig.chromeStoreUrl);
   const edgeStore = resolved(siteConfig.edgeStoreUrl);
   const published = Boolean(chromeStore || edgeStore);

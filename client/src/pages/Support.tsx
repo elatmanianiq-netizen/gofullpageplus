@@ -22,6 +22,7 @@ import {
 import { Link } from "wouter";
 
 import SiteShell from "@/components/SiteShell";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { siteConfig, supportMailto } from "@/site-config";
 import {
   SUPPORT_CATEGORIES,
@@ -83,6 +84,12 @@ function describeBrowser(): string {
 }
 
 export default function Support() {
+  usePageMeta({
+    title: "Contact Support",
+    description: `Report an issue or ask a question about ${siteConfig.productName}. We reply by email, usually within two business days.`,
+    path: "/support",
+  });
+
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [banner, setBanner] = useState<string>("");

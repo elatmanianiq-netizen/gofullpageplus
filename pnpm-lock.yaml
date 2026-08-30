@@ -112,6 +112,9 @@ importers:
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.2.1)
+      esbuild:
+        specifier: ^0.25.0
+        version: 0.25.10
       express:
         specifier: ^4.21.2
         version: 4.21.2
@@ -209,9 +212,6 @@ importers:
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.21(postcss@8.5.6)
-      esbuild:
-        specifier: ^0.25.0
-        version: 0.25.10
       pnpm:
         specifier: ^10.15.1
         version: 10.18.1

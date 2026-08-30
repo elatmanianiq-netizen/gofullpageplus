@@ -7,4 +7,4 @@ Disallow: /api/
 
 # Replace the host below with your deployed domain, matching `siteUrl` in
 # client/src/site-config.ts.
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://www.gofullpageplus.com/sitemap.xml

@@ -48,7 +48,7 @@ export const siteConfig = {
    * The Chrome Web Store requires the privacy policy to be reachable at a
    * public URL, which will be `${siteUrl}/privacy`.
    */
-  siteUrl: `${TODO} https://yourdomain.com`,
+  siteUrl: "https://www.gofullpageplus.com",
   /** Chrome Web Store listing URL. Empty until the item is published. */
   chromeStoreUrl: "https://chromewebstore.google.com/detail/dlkkakbocpnhmdbjlknaapnnfefigjoe",
   /** Microsoft Edge Add-ons listing URL. Empty if you are not shipping there. */

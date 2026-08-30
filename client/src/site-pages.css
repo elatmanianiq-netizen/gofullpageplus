@@ -23,12 +23,6 @@
   padding: 0.1rem 0.3rem;
   font-size: 0.76rem;
 }
-.gfp-app.dark .gfp-config-warning {
-  border-color: #5c4416;
-  background: #2a2113;
-  color: #f0d9a8;
-}
-
 /* ── Long-form document pages ────────────────────────────────────────────── */
 .gfp-page {
   display: block;
@@ -279,10 +273,6 @@
   flex: 0 0 auto;
   margin-top: 0.15rem;
 }
-.gfp-app.dark .support-banner-error {
-  border-color: #6b3527;
-  color: #ffb09e;
-}
 
 .support-form {
   display: grid;
@@ -352,9 +342,6 @@
   font-size: 0.82rem;
   font-weight: 600;
 }
-.gfp-app.dark .support-error {
-  color: #ff9c85;
-}
 .support-counter {
   margin: 0;
   color: var(--soft);
@@ -377,13 +364,6 @@
 .support-hint-footer {
   margin-top: 0.7rem !important;
   font-weight: 600;
-}
-.gfp-app.dark .support-hint {
-  border-color: #57451c;
-  background: #262013;
-}
-.gfp-app.dark .support-hint p {
-  color: #e8d5a3;
 }
 
 /* Off-screen rather than display:none, which some bots skip. */

@@ -1,5 +1,5 @@
 /**
- * Shared chrome for every page: skip link, sticky header, footer, dark mode.
+ * Shared chrome for every page: skip link, sticky header, footer.
  *
  * Home used to carry its own copy of the header and footer with placeholder
  * hash links (#privacy, #terms, #contact). Those links are exactly what a
@@ -7,7 +7,7 @@
  * real routes.
  */
 import { useEffect, useState, type ReactNode } from "react";
-import { ArrowRight, ExternalLink, Menu, Moon, Sun, X } from "lucide-react";
+import { ArrowRight, ExternalLink, Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 import {
@@ -16,21 +16,6 @@ import {
   resolved,
   siteConfig,
 } from "@/site-config";
-
-const DARK_STORAGE_KEY = "gfp-theme";
-
-function readStoredPreference(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    const stored = window.localStorage.getItem(DARK_STORAGE_KEY);
-    if (stored === "dark") return true;
-    if (stored === "light") return false;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  } catch {
-    // Private browsing modes can throw on localStorage access.
-    return false;
-  }
-}
 
 interface SiteShellProps {
   children: ReactNode;
@@ -42,17 +27,8 @@ interface SiteShellProps {
 }
 
 export default function SiteShell({ children, variant = "page" }: SiteShellProps) {
-  const [dark, setDark] = useState(readStoredPreference);
   const [menuOpen, setMenuOpen] = useState(false);
   const [location] = useLocation();
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(DARK_STORAGE_KEY, dark ? "dark" : "light");
-    } catch {
-      // Persisting the preference is a nicety, not a requirement.
-    }
-  }, [dark]);
 
   // wouter does not reset scroll between routes, so a visitor moving from the
   // footer to /privacy would otherwise land halfway down the policy.
@@ -66,7 +42,7 @@ export default function SiteShell({ children, variant = "page" }: SiteShellProps
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <div className={dark ? "gfp-app dark" : "gfp-app"}>
+    <div className="gfp-app">
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
@@ -92,15 +68,6 @@ export default function SiteShell({ children, variant = "page" }: SiteShellProps
           </div>
 
           <div className="gfp-nav-actions">
-            <button
-              type="button"
-              className="gfp-icon-button"
-              onClick={() => setDark((value) => !value)}
-              aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {dark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-
             {chromeStore ? (
               <a
                 className="gfp-nav-cta"

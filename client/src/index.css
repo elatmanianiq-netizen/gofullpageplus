@@ -9,8 +9,6 @@
 @import "./workflow-demo.css";
 @import "./site-pages.css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline { --font-sans: "DM Sans", Arial, sans-serif; --color-background: var(--bg); --color-foreground: var(--ink); --color-card: var(--card); --color-card-foreground: var(--ink); --color-primary: var(--coral); --color-primary-foreground: white; --color-border: var(--line); --color-ring: var(--coral); }
 
 * { box-sizing: border-box; }
@@ -19,7 +17,6 @@ body { min-width: 320px; margin: 0; background: #fffdf9; font-family: "DM Sans",
 button, a { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled), a[href] { cursor: pointer; }
 .gfp-app { --bg: #fffdf9; --ink: #1f2937; --soft: #667085; --muted: #f7f6f3; --card: #ffffff; --line: #e8e6e1; --sky: #eaf4ff; --sky-deep: #d4eaff; --coral: #f25737; --coral-deep: #d94124; --coral-soft: #fff0eb; min-height: 100vh; background: var(--bg); color: var(--ink); transition: background-color .2s ease, color .2s ease; }
-.gfp-app.dark { --bg: #101418; --ink: #f7f7f3; --soft: #bdc2cb; --muted: #161d23; --card: #171f26; --line: #2b353d; --sky: #152739; --sky-deep: #1a3751; --coral: #ff7658; --coral-deep: #ff947b; --coral-soft: #3e251f; }
 .skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 100; transform: translateY(-180%); border-radius: .55rem; background: var(--coral); padding: .7rem 1rem; color: white; font-size: .85rem; font-weight: 700; text-decoration: none; transition: transform .15s ease; }
 .skip-link:focus { transform: translateY(0); }
 .gfp-header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(16px); }

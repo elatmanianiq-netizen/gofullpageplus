@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Capture fixture</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Exactly 2500px tall. Bands are absolutely positioned so nothing the test
+         adds (fixed header, sticky chip) can shift the document height. */
+      body {
+        height: 2500px;
+        position: relative;
+        overflow-x: hidden;
+        background: #fff;
+      }
+
+      .band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 500px;
+      }
+
+      /* Must appear in the first segment only. If it is stamped onto later
+         segments, the capture is neutralising overlays incorrectly. */
+      #fixed-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: rgb(0, 0, 0);
+        z-index: 10;
+      }
+
+      /* Narrow and left-aligned so it never sits under the centre sample column. */
+      #sticky-host {
+        position: absolute;
+        top: 600px;
+        left: 0;
+        width: 200px;
+        height: 900px;
+      }
+
+      #sticky-chip {
+        position: sticky;
+        top: 0;
+        width: 200px;
+        height: 30px;
+        background: rgb(255, 128, 0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="band" style="top: 0; background: rgb(255, 0, 0)"></div>
+    <div class="band" style="top: 500px; background: rgb(0, 128, 0)"></div>
+    <div class="band" style="top: 1000px; background: rgb(0, 0, 255)"></div>
+    <div class="band" style="top: 1500px; background: rgb(255, 255, 0)"></div>
+    <div class="band" style="top: 2000px; background: rgb(255, 0, 255)"></div>
+
+    <div id="sticky-host"><div id="sticky-chip"></div></div>
+
+    <div id="fixed-header"></div>
+
+    <!-- Native lazy loading: pagePrepare should flip this to eager. -->
+    <img
+      id="lazy-image"
+      loading="lazy"
+      width="40"
+      height="40"
+      style="position: absolute; top: 2400px; left: 0"
+      alt=""
+      src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMDBmZmZmIi8+PC9zdmc+"
+    />
+  </body>
+</html>

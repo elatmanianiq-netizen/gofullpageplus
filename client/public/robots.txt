@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# The support inbox holds messages from real users. Never index it.
+Disallow: /admin
+Disallow: /api/
+
+# Replace the host below with your deployed domain, matching `siteUrl` in
+# client/src/site-config.ts.
+Sitemap: https://yourdomain.com/sitemap.xml

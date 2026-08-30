@@ -42,6 +42,11 @@ export const PAGE_META: Record<string, RouteMeta> = {
     description: `How ${siteConfig.productName} works, fixes for captures that look wrong, keyboard shortcuts, and exactly what happens to your data.`,
     path: "/faq",
   },
+  "/demo": {
+    title: `Demo — How to Use | ${siteConfig.productName}`,
+    description: `Watch a short video walkthrough of ${siteConfig.productName} and follow the step-by-step guide to capture and export a full page screenshot.`,
+    path: "/demo",
+  },
 };
 
 export function metaForRoute(route: string): RouteMeta {

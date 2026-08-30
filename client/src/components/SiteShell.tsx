@@ -62,6 +62,7 @@ export default function SiteShell({ children, variant = "page" }: SiteShellProps
           </Link>
 
           <div className="gfp-desktop-nav">
+            <Link href="/demo">Demo</Link>
             <Link href="/faq">FAQ</Link>
             <Link href="/support">Contact support</Link>
             <Link href="/privacy">Privacy</Link>
@@ -97,6 +98,9 @@ export default function SiteShell({ children, variant = "page" }: SiteShellProps
 
         {menuOpen && (
           <div className="gfp-mobile-nav">
+            <Link href="/demo" onClick={closeMenu}>
+              Demo
+            </Link>
             <Link href="/faq" onClick={closeMenu}>
               FAQ
             </Link>
@@ -141,6 +145,7 @@ export default function SiteShell({ children, variant = "page" }: SiteShellProps
             <div>
               <h3>Product</h3>
               <a href="/#benefits">Features</a>
+              <Link href="/demo">Demo</Link>
               <Link href="/faq">FAQ</Link>
               {chromeStore ? (
                 <a href={chromeStore} target="_blank" rel="noreferrer noopener">

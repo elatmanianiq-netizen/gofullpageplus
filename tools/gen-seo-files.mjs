@@ -21,6 +21,7 @@ const OUT_DIR = path.join(ROOT, "dist", "public");
 /** Indexable routes with a change frequency and priority for the sitemap. */
 const ROUTES = [
   { path: "/", changefreq: "monthly", priority: "1.0" },
+  { path: "/demo", changefreq: "monthly", priority: "0.8" },
   { path: "/faq", changefreq: "monthly", priority: "0.8" },
   { path: "/support", changefreq: "yearly", priority: "0.7" },
   { path: "/privacy", changefreq: "yearly", priority: "0.6" },

@@ -15,7 +15,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { resolved, siteConfig } from "@/site-config";
 
 /** YouTube video id for the walkthrough. */
-const VIDEO_ID = "B08SKtXK4xU";
+const VIDEO_ID = "sUFbfAfa9rE";
 
 const steps = [
   {

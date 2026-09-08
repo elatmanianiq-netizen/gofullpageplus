@@ -15,14 +15,15 @@ const TODO = "TODO:";
 
 export const siteConfig = {
   // ── Product identity ──────────────────────────────────────────────────────
-  /** Marketing name used across the website. */
-  productName: "GoFullPage Plus",
-  /** Exact `name` field from extension/manifest.json. Keep these in sync. */
-  extensionName: "GoFullPage Plus Capture",
+  /** Short marketing name used across the website. */
+  productName: "Full Page Capture",
+  /** Full name / Chrome Web Store title. Keep in sync with the manifest. */
+  extensionName: "Full Page Capture - Screen Capture & Editor",
   /** Exact `version` field from extension/manifest.json. */
   extensionVersion: "1.1.0",
   /** Short product promise, reused in meta tags and the store summary. */
-  tagline: "Capture an entire webpage in one click, then export it as PNG, JPG, or PDF.",
+  tagline:
+    "Capture full webpages, visible areas or selected regions, edit screenshots, and export to PNG, JPG or PDF.",
 
   // ── Legal entity ──────────────────────────────────────────────────────────
   /**

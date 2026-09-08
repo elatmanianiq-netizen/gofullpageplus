@@ -1,5 +1,5 @@
 /**
- * Landing page for GoFullPage Plus.
+ * Landing page for Full Page Capture.
  *
  * Everything stated here has to be true and verifiable against the extension
  * source, because the Chrome Web Store compares listing claims against the
@@ -95,7 +95,7 @@ const faqPreview = [
 
 export default function Home() {
   usePageMeta({
-    title: `${siteConfig.productName} | Full Page Screenshot Extension for Chrome & Edge`,
+    title: `${siteConfig.extensionName} for Chrome & Edge`,
     description: `${siteConfig.tagline} Free, runs entirely in your browser with no account and no tracking.`,
     path: "/",
     exact: true,

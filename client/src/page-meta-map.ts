@@ -18,7 +18,7 @@ export interface RouteMeta {
 
 export const PAGE_META: Record<string, RouteMeta> = {
   "/": {
-    title: `${siteConfig.productName} | Full Page Screenshot Extension for Chrome & Edge`,
+    title: `${siteConfig.extensionName} for Chrome & Edge`,
     description: `${siteConfig.tagline} Free, runs entirely in your browser with no account and no tracking.`,
     path: "/",
   },

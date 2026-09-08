@@ -5,63 +5,27 @@ Ordered by how likely each item is to cause a rejection.
 
 ---
 
-## 1. BLOCKING — the product name
+## 1. RESOLVED — the product name
 
-**Current name:** `GoFullPage Plus Capture`, marketed as "GoFullPage Plus".
+**Name:** `Full Page Capture - Screen Capture & Editor`, marketed as
+"Full Page Capture".
 
-**Why this fails.** `GoFullPage` is an established, separately owned Chrome
-extension for full-page screenshots with a very large user base. Naming a
-competing product `GoFullPage Plus` reads as an official companion or upgrade to
-that product. The Chrome Web Store prohibits listings that impersonate another
-product or mislead users about who publishes them, and reviewers reject
-lookalike naming of well-known extensions routinely. Adding a word like "Plus"
-to someone else's brand makes the problem worse, not better, because it implies
-an affiliation.
+The name describes the function rather than borrowing from any other product,
+does not imply affiliation with another extension, and is used consistently
+across the site, metadata, and (when you ship it) the manifest. Keep it that
+way: do not add another product's brand as a prefix or suffix, and do not copy
+another extension's listing artwork or support-page layout. The support form at
+`/support` uses this site's own design, wording, and categories.
 
-**Why the timing makes it worse.** As reported by
-[Android Authority on 14 August 2026](https://www.androidauthority.com/chrome-gofullpage-extension-unsafe-3698292/),
-GoFullPage was pulled from the Chrome Web Store that week and Chromium browsers
-began warning users that it violated store policy. Its developer said the
-takedown related to a copyright dispute rather than any security compromise, and
-that they were working with Google to restore the listing.
-*Content rephrased from the source for licensing compliance.*
-
-That means a reviewer looking at your submission right now is seeing a new
-extension using the name of a product just removed over an intellectual property
-complaint, offering the same functionality, published by a different developer.
-The most favourable reading available to them is "trying to capture the displaced
-users of a suspended brand". Expect rejection, and be aware that the trademark
-owner could file a complaint against your listing independently of Google.
-
-**What to do.** Choose a name that is yours. It should not contain
-"GoFullPage", and should not be a near-miss of another screenshot extension's
-name. Describe the function, not a competitor:
-
-- Fullpage Snap
-- ScrollShot
-- PageArchive Capture
-- Longshot Capture
-- Tallgrab
-
-Once you pick one, these are the places to change it. The site pulls almost
-everything from one file:
+The site pulls its branding from one file, so future name changes are a
+one-place edit:
 
 | Location | Field |
 | --- | --- |
 | `client/src/site-config.ts` | `productName`, `extensionName` |
 | `extension/manifest.json` | `name`, `short_name`, `author` |
 | `client/index.html` | `<title>`, meta description, JSON-LD `name` |
-| `client/public/logo.png` and `extension/icons/*` | artwork, if it echoes the old brand |
 | `store-listing/01-listing-copy.md` | listing name and description |
-
-Also remove anything that imitates the other product's presentation. The support
-form design you supplied as a reference is GoFullPage's own support page; the
-form built at `/support` deliberately uses this site's own layout, wording, and
-categories rather than copying theirs. Keep it that way.
-
-**Do not skip this one.** Everything else in this folder is paperwork you can
-iterate on after a rejection. A name-based rejection can escalate to an
-enforcement action against your developer account, which is much harder to undo.
 
 ---
 

@@ -44,7 +44,7 @@ them accurate if the extension changes.
 
 | Item | Value |
 | --- | --- |
-| Extension name | `GoFullPage Plus Capture` (`extension/manifest.json`) — **see naming issue** |
+| Extension name | `Full Page Capture - Screen Capture & Editor` (`extension/manifest.json`) |
 | Version | `1.1.0` |
 | Manifest version | 3 |
 | Permissions | `tabs`, `scripting`, `downloads` |

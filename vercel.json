@@ -3,7 +3,6 @@
   "outputDirectory": "dist/public",
   "rewrites": [
     { "source": "/api/support/tickets", "destination": "/api/support/tickets" },
-    { "source": "/demo", "destination": "/demo.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/support", "destination": "/support.html" },

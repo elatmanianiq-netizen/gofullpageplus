@@ -136,14 +136,13 @@ export default function Home() {
                 <Chrome size={18} /> Add to Chrome <ExternalLink size={15} />
               </a>
             ) : (
-              <a href="#download" className="coral-button">
-                <Chrome size={18} /> Get {siteConfig.productName}{" "}
-                <ArrowRight size={17} />
+              <a href="#benefits" className="coral-button">
+                See what it does <ArrowRight size={17} />
               </a>
             )}
-            <a href="#benefits" className="outline-button">
-              See what it does <ArrowRight size={17} />
-            </a>
+            <Link href="/faq" className="outline-button">
+              Read the FAQ <ArrowRight size={17} />
+            </Link>
           </div>
 
           <div className="hero-device" aria-label="Capture preview">
@@ -526,14 +525,14 @@ export default function Home() {
             </div>
           ) : (
             <div className="download-buttons">
-              <a href="#download" className="coral-button" onClick={(e) => e.preventDefault()}>
-                <Download size={18} /> Download Extension
-              </a>
+              <Link href="/faq">
+                See how it works <ArrowRight size={16} />
+              </Link>
             </div>
           )}
 
           <p className="download-legal">
-            By installing you accept our <Link href="/terms">Terms</Link> and{" "}
+            Your use is covered by our <Link href="/terms">Terms</Link> and{" "}
             <Link href="/privacy">Privacy Policy</Link>. Need help?{" "}
             <Link href="/support">Contact support</Link>.
           </p>

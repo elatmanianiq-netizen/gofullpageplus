@@ -15,7 +15,10 @@ import { Link } from "wouter";
 
 import SiteShell from "@/components/SiteShell";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { siteConfig, supportMailto } from "@/site-config";
+import { resolved, siteConfig, supportMailto } from "@/site-config";
+
+/** Only render address text when it is actually filled in (not a TODO). */
+const postalAddress = resolved(siteConfig.postalAddress);
 
 /** Mirrors extension/manifest.json. Keep the two in step. */
 const permissions = [
@@ -95,9 +98,10 @@ export default function Privacy() {
           <h2 id="who">1. Who is responsible for your data</h2>
           <p>
             {siteConfig.extensionName} (the "extension") and this website are
-            published by {siteConfig.legalEntity} ("we", "us"), at{" "}
-            {siteConfig.postalAddress}. For any question about this policy, or to
-            exercise the rights described in section 9, contact us at{" "}
+            published by {siteConfig.legalEntity} ("we", "us")
+            {postalAddress ? `, at ${postalAddress}` : ""}. For any question about
+            this policy, or to exercise the rights described in section 9, contact
+            us at{" "}
             {supportMailto ? (
               <a href={`mailto:${siteConfig.privacyEmail}`}>
                 {siteConfig.privacyEmail}
@@ -351,9 +355,9 @@ export default function Privacy() {
           <p>
             The extension's strongest security property is architectural: what is
             never transmitted cannot be intercepted or breached. For this website,
-            we serve everything over HTTPS, keep the support inbox behind
-            authentication, and store no payment details of any kind. No system is
-            perfectly secure, but the amount of data we hold is deliberately small.
+            we serve everything over HTTPS and store no payment details of any
+            kind. No system is perfectly secure, but the amount of data we hold is
+            deliberately small.
           </p>
         </section>
 
@@ -361,9 +365,8 @@ export default function Privacy() {
           <h2 id="changes">12. Changes to this policy</h2>
           <p>
             If we change how data is handled, we will update this page and change
-            the date at the top. Material changes will also be described in the
-            extension's changelog on its store listing. Continuing to use the
-            extension after a change means you accept the updated policy.
+            the date at the top. Continuing to use the extension after a change
+            means you accept the updated policy.
           </p>
         </section>
 
@@ -372,8 +375,12 @@ export default function Privacy() {
           <p>
             {siteConfig.legalEntity}
             <br />
-            {siteConfig.postalAddress}
-            <br />
+            {postalAddress && (
+              <>
+                {postalAddress}
+                <br />
+              </>
+            )}
             {supportMailto ? (
               <a href={`mailto:${siteConfig.privacyEmail}`}>
                 {siteConfig.privacyEmail}

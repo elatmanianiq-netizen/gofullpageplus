@@ -39,7 +39,7 @@ const OUT_DIR = path.join(ROOT, "dist", "public");
 const TMP = path.join(ROOT, "node_modules", ".prerender");
 
 /** Public, indexable routes. /admin is intentionally excluded. */
-const ROUTES = ["/", "/demo", "/privacy", "/terms", "/support", "/faq"];
+const ROUTES = ["/", "/privacy", "/terms", "/support", "/faq"];
 
 // ─── Minimal browser shim ────────────────────────────────────────────────────
 // Installed before the app module is imported so any module-load-time access to

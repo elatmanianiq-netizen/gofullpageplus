@@ -4,7 +4,6 @@ import NotFound from "@/pages/NotFound";
 import { Route, Router as WouterRouter, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Demo from "./pages/Demo";
 import Faq from "./pages/Faq";
 import Home from "./pages/Home";
 import Privacy from "./pages/Privacy";
@@ -21,7 +20,6 @@ function Router() {
         particular must stay at a stable path: changing it means editing the
         listing and waiting for another review.
       */}
-      <Route path={"/demo"} component={Demo} />
       <Route path={"/privacy"} component={Privacy} />
       <Route path={"/terms"} component={Terms} />
       <Route path={"/support"} component={Support} />

@@ -31,7 +31,7 @@ export const siteConfig = {
    * This name goes in the Privacy Policy and Terms of Service, and it must
    * match the developer name on your Chrome Web Store developer account.
    */
-  legalEntity: `${TODO} Your legal name or registered company name`,
+  legalEntity: "Full Page Capture",
   /** Postal address. Required for GDPR/CCPA notices and store verification. */
   postalAddress: `${TODO} Street, City, Postal code, Country`,
   /** Country or state whose law governs the Terms of Service. */
@@ -39,9 +39,9 @@ export const siteConfig = {
 
   // ── Contact ───────────────────────────────────────────────────────────────
   /** Public support address. Shown on the site and in the store listing. */
-  supportEmail: `${TODO} support@yourdomain.com`,
+  supportEmail: "support@gofullpageplus.com",
   /** Address for privacy and data-deletion requests. May equal supportEmail. */
-  privacyEmail: `${TODO} privacy@yourdomain.com`,
+  privacyEmail: "support@gofullpageplus.com",
 
   // ── URLs ──────────────────────────────────────────────────────────────────
   /**
@@ -50,8 +50,8 @@ export const siteConfig = {
    * public URL, which will be `${siteUrl}/privacy`.
    */
   siteUrl: "https://www.gofullpageplus.com",
-  /** Chrome Web Store listing URL. Empty until the item is published. */
-  chromeStoreUrl: "https://chromewebstore.google.com/detail/dlkkakbocpnhmdbjlknaapnnfefigjoe",
+  /** Chrome Web Store listing URL. Empty = no install links shown anywhere. */
+  chromeStoreUrl: "",
   /** Microsoft Edge Add-ons listing URL. Empty if you are not shipping there. */
   edgeStoreUrl: "",
 
